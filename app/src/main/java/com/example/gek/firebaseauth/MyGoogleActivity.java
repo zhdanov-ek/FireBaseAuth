@@ -25,7 +25,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 
 
-public class GoogleActivity extends AppCompatActivity
+public class MyGoogleActivity extends AppCompatActivity
         implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
     private static int RC_SIGN_IN_GOOGLE = 0;               //request code for auth Google
     private static String TAG = "GOOGLE_ACTIVITY";

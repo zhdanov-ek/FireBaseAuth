@@ -32,7 +32,7 @@ import com.google.firebase.auth.FirebaseUser;
  * Потом зайти на https://developers.facebook.com и добавить свое приложение после чего получить
  * идентификатор и ключ, который нужно ввести в коносль файрбейс
  */
-public class FaceBookActivity extends AppCompatActivity implements View.OnClickListener{
+public class MyFaceBookActivity extends AppCompatActivity implements View.OnClickListener{
 
     private static int RC_SIGN_IN_FACEBOOK = 1;               //request code for auth FaceBook
     private static String TAG = "FACEBOOK_ACTIVITY";
@@ -142,7 +142,7 @@ public class FaceBookActivity extends AppCompatActivity implements View.OnClickL
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(FaceBookActivity.this, "Authentication failed.",
+                            Toast.makeText(MyFaceBookActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
 

@@ -20,6 +20,10 @@ android {
 
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -35,7 +39,6 @@ dependencies {
 
     // Facebook Android SDK (only required for Facebook Login)
     compile 'com.facebook.android:facebook-android-sdk:4.9.0'
-
     testCompile 'junit:junit:4.12'
 }
 

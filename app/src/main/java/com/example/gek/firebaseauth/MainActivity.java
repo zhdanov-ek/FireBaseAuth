@@ -4,12 +4,8 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
-
-    Button btnGoogle;
-    Button btnFaceBook;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,10 +22,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         switch(view.getId()){
             case R.id.btnGoogle:
-                startActivity(new Intent(this, GoogleActivity.class));
+                startActivity(new Intent(this, MyGoogleActivity.class));
                 break;
             case R.id.btnFaceBook:
-                startActivity(new Intent(this, FaceBookActivity.class));
+                startActivity(new Intent(this, MyFaceBookActivity.class));
                 break;
         }
     }
