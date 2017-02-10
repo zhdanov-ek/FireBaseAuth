@@ -23,11 +23,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+/**
+ *
+ * */
 
 
 public class MyGoogleActivity extends AppCompatActivity
         implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
-    private static int RC_SIGN_IN_GOOGLE = 0;               //request code for auth Google
+    private static int RC_SIGN_IN_GOOGLE = 0;               // request code for auth Google
     private static String TAG = "GOOGLE_ACTIVITY";
     private GoogleApiClient mGoogleApiClient;
     private FirebaseAuth mAuth;
@@ -104,7 +107,7 @@ public class MyGoogleActivity extends AppCompatActivity
                 firebaseAuthWithGoogle(account);
             }
             else
-                Log.d(TAG, "Google Login Failed");
+                Log.d(TAG, "Google Login Failed " + result.getStatus().toString());
 
         }
     }

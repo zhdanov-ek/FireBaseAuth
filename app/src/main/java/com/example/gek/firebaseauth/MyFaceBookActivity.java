@@ -30,11 +30,11 @@ import com.google.firebase.auth.FirebaseUser;
 /**
  * / Прежде чем начать необходимо включить в консоли файрбейс аутентификацию через фейсбук.
  * Потом зайти на https://developers.facebook.com и добавить свое приложение после чего получить
- * идентификатор и ключ, который нужно ввести в коносль файрбейс
+ * идентификатор и ключ, который нужно ввести в коносль файрбейс (Auth/FaceBook)
+ *
  */
 public class MyFaceBookActivity extends AppCompatActivity implements View.OnClickListener{
 
-    private static int RC_SIGN_IN_FACEBOOK = 1;               //request code for auth FaceBook
     private static String TAG = "FACEBOOK_ACTIVITY";
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -57,6 +57,11 @@ public class MyFaceBookActivity extends AppCompatActivity implements View.OnClic
 
 
         mAuth = FirebaseAuth.getInstance();
+        if (mAuth.getCurrentUser() != null){
+            String s = "Provider: " + mAuth.getCurrentUser().getProviderId() +
+                    " Email: " + mAuth.getCurrentUser().getEmail();
+            Toast.makeText(this, "Current sign in \n" + s, Toast.LENGTH_LONG).show();
+        }
 
         // [START auth_state_listener]
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -145,7 +150,6 @@ public class MyFaceBookActivity extends AppCompatActivity implements View.OnClic
                             Toast.makeText(MyFaceBookActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
-
                     }
                 });
     }
