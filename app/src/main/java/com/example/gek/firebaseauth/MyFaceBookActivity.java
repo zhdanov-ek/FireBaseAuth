@@ -25,12 +25,29 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 
 /**
  * / Прежде чем начать необходимо включить в консоли файрбейс аутентификацию через фейсбук.
  * Потом зайти на https://developers.facebook.com и добавить свое приложение после чего получить
  * идентификатор и ключ, который нужно ввести в коносль файрбейс (Auth/FaceBook)
+ * Затем с помощью keytool получить ключ, который ввести в проект фейсбук через консоль
+ * разработчика.
+ *
+ *  В build.gradle добавляем mavenCentral() и com.facebook.android:facebook-android-sdk:4.9.0
+ *
+ * Добавьте новую строку с именем facebook_app_id в strings.xml.
+ * В качестве значения используйте свой ID приложения Facebook.
+ * В манифесте добавьте строку с мета данными указывающую на выше добавленную строку с ID
+ *
+ *
+ * Если к учетке файрбейса привязан эмейл, который уже есть в списке юзеров ФАЙРБЕЙС, то авторизация
+ * не пройдет. Будет ошибка с указанием коллизии емейлов. Если первый зарегит емейл именно фейсбук
+ * то гугл затрет учетку фейсбука и все таки авторизируется
+ *
+ * https://developers.facebook.com/docs/android/getting-started
+ * https://developers.facebook.com/docs/facebook-login/android
  *
  */
 public class MyFaceBookActivity extends AppCompatActivity implements View.OnClickListener{
@@ -39,9 +56,8 @@ public class MyFaceBookActivity extends AppCompatActivity implements View.OnClic
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private CallbackManager mCallbackManager;
-    private TextView tvStatus, tvDetail;
+    private TextView tvStatusFireBase, tvStatusFacebook, tvLog;
     private Button btnSignOut;
-
 
 
     @Override
@@ -50,32 +66,43 @@ public class MyFaceBookActivity extends AppCompatActivity implements View.OnClic
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_face_book);
 
-
-        tvStatus = (TextView) findViewById(R.id.tvStatus);
-        tvDetail = (TextView) findViewById(R.id.tvDetail);
+        tvStatusFireBase = (TextView) findViewById(R.id.tvStatusFireBase);
+        tvStatusFacebook = (TextView) findViewById(R.id.tvStatusFacebook);
+        tvLog = (TextView) findViewById(R.id.tvLog);
         btnSignOut = (Button) findViewById(R.id.btnSignOut);
-
+        btnSignOut.setOnClickListener(this);
 
         mAuth = FirebaseAuth.getInstance();
+
+        // Проверяем есть ли аутентификация файрбейс
         if (mAuth.getCurrentUser() != null){
+            print("OnCreate: user FIREBASE not null");
             String s = "Provider: " + mAuth.getCurrentUser().getProviderId() +
-                    " Email: " + mAuth.getCurrentUser().getEmail();
-            Toast.makeText(this, "Current sign in \n" + s, Toast.LENGTH_LONG).show();
+                    "\nEmail: " + mAuth.getCurrentUser().getEmail() +
+                    "\nUid: " + mAuth.getCurrentUser().getUid();
+            print(s);
+            tvStatusFireBase.setText(s);
         }
 
-        // [START auth_state_listener]
+        // лисенер аутентификации в файрбейс
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
+                    String s = "Provider: " + user.getProviderId() +
+                            "\nEmail: " + user.getEmail() +
+                            "\nUid: " + user.getUid();
+                    tvStatusFireBase.setText(s);
+                    print(" \nFirebase AuthListener catch change state \n Sign IN.\n User ID: " + user.getUid());
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
+                    tvStatusFireBase.setText("no user");
+                    print(" \nFirebase AuthListener catch change state \n Sign OUT");
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
-                updateUI(user);
             }
         };
 
@@ -87,26 +114,90 @@ public class MyFaceBookActivity extends AppCompatActivity implements View.OnClic
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Log.d(TAG, "facebook:onSuccess:" + loginResult);
+                print("Work facebook-callback (onSuccess):\n " + loginResult);
                 handleFacebookAccessToken(loginResult.getAccessToken());
             }
 
             @Override
             public void onCancel() {
                 Log.d(TAG, "facebook:onCancel");
-                updateUI(null);
             }
 
             @Override
             public void onError(FacebookException error) {
                 Log.d(TAG, "facebook:onError", error);
-                updateUI(null);
             }
         });
-        // [END initialize_fblogin]
 
     }
 
+
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Pass the activity result back to the Facebook SDK
+        // Полученный результат с Facebook SDK передаем в CallbackManager
+        print("\nReceive result from Facebook SDK");
+        mCallbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    // Аутентификация в файрбейс через полученный с помощью фейсбука токен
+    private void handleFacebookAccessToken(AccessToken token) {
+        print("\nAuth in FireBase with Facebook token " + token);
+        final AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "signInWithCredential", task.getException());
+                            Toast.makeText(MyFaceBookActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+
+                            // Если емейл уже в файрбейсе такой есть то это ошибка будет такого типа
+                            // Такая ситуация возникает когда до фейбука аутентификацию прошел к примеру
+                            // гугл с таким же емейлом
+                            if(task.getException() instanceof FirebaseAuthUserCollisionException) {
+                                Toast.makeText(getApplicationContext(), "User with Email id already exists",
+                                        Toast.LENGTH_SHORT).show();
+                                print("\n ERROR \n" + task.getException().toString());
+                            }
+                            // очищаем данные по фейсбуку
+                            LoginManager.getInstance().logOut();
+                            tvStatusFacebook.setText("no user");
+                        } else {
+                            tvStatusFacebook.setText(credential.getProvider() + "\n " + credential.toString());
+                        }
+                    }
+                });
+    }
+
+    public void signOut() {
+        // Убираем утентификацию с FireBase
+        mAuth.signOut();
+        // Убираем утентификацию с Facebook
+        LoginManager.getInstance().logOut();
+        tvStatusFacebook.setText("no user");
+        print("\n CLEAR ALL AUTH\n");
+    }
+
+
+
+    @Override
+    public void onClick(View v) {
+        int i = v.getId();
+        if (i == R.id.btnSignOut) {
+            signOut();
+        }
+    }
 
     @Override
     public void onStart() {
@@ -123,66 +214,8 @@ public class MyFaceBookActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // Pass the activity result back to the Facebook SDK
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
-    }
-
-    // [START auth_with_facebook]
-    private void handleFacebookAccessToken(AccessToken token) {
-        Log.d(TAG, "handleFacebookAccessToken:" + token);
-        // [START_EXCLUDE silent]
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(MyFaceBookActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-    }
-    // [END auth_with_facebook]
-
-    public void signOut() {
-        mAuth.signOut();
-        LoginManager.getInstance().logOut();
-        updateUI(null);
-    }
-
-    private void updateUI(FirebaseUser user) {
-        if (user != null) {
-            tvStatus.setText(user.getDisplayName());
-            tvDetail.setText(user.getUid());
-
-            findViewById(R.id.button_facebook_login).setVisibility(View.GONE);
-            btnSignOut.setVisibility(View.VISIBLE);
-        } else {
-            tvStatus.setText("Sign out");
-            tvDetail.setText(null);
-
-            findViewById(R.id.button_facebook_login).setVisibility(View.VISIBLE);
-            btnSignOut.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        int i = v.getId();
-        if (i == R.id.btnSignOut) {
-            signOut();
-        }
+    private void print(String text){
+        tvLog.append(text + "\n");
     }
 
 }

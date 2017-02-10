@@ -72,6 +72,7 @@ public class MyGoogleActivity extends AppCompatActivity
                 .requestEmail()
                 .build();
 
+        // Создание клиента  через который мы и получаем доступ к PlayServices
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
@@ -125,6 +126,7 @@ public class MyGoogleActivity extends AppCompatActivity
     }
 
 
+    // Реализуем интерфейс обработки ошибок соединений при работе с API GS
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "Connection failed.");

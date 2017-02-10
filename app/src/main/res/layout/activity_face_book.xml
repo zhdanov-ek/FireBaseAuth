@@ -3,19 +3,30 @@
     android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
+    android:gravity="top"
     android:orientation="vertical">
 
-
     <TextView
-        android:id="@+id/tvStatus"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CURRENT STATE OF FIREBASE"/>
+    <TextView
+        android:id="@+id/tvStatusFireBase"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <TextView
-        android:id="@+id/tvDetail"
+        android:paddingTop="10dp"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CURRENT STATE OF FACEBOOK"/>
+    <TextView
+        android:id="@+id/tvStatusFacebook"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
 
     <com.facebook.login.widget.LoginButton
         android:id="@+id/button_facebook_login"
@@ -26,8 +37,22 @@
         android:id="@+id/btnSignOut"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="sign_out"
-        android:visibility="visible" />
+        android:text="sign_out" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="LOG"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/tvLog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </ScrollView>
 
 
 </LinearLayout>
