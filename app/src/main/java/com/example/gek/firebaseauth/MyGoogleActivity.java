@@ -22,6 +22,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 /**
  *
@@ -34,6 +36,7 @@ public class MyGoogleActivity extends AppCompatActivity
     private static String TAG = "GOOGLE_ACTIVITY";
     private GoogleApiClient mGoogleApiClient;
     private FirebaseAuth mAuth;
+    private DatabaseReference mDb;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
 
@@ -46,6 +49,7 @@ public class MyGoogleActivity extends AppCompatActivity
         findViewById(R.id.sign_out_button).setOnClickListener(this);
 
         mAuth = FirebaseAuth.getInstance();
+        mDb = FirebaseDatabase.getInstance().getReference();
 
         // лисенер следит за изменениями состояния авторизации
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -58,6 +62,16 @@ public class MyGoogleActivity extends AppCompatActivity
                     Log.d(TAG, "user logged in: providerId - " + user.getProviderId());
                     Log.d(TAG, "user logged in: UID - " + user.getUid());
                     Toast.makeText(getBaseContext(), "Sign in " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
+
+                    mDb.child("free").child(user.getUid()).child("user_name").setValue(user.getDisplayName());
+                    mDb.child("free").child(user.getUid()).child("user_email").setValue(user.getEmail());
+                    mDb.child("free").child(user.getUid()).child("user_provider").setValue(user.getProviderId());
+
+                    mDb.child("users").child(user.getUid()).child("user_name").setValue(user.getDisplayName());
+                    mDb.child("users").child(user.getUid()).child("user_email").setValue(user.getEmail());
+                    mDb.child("users").child(user.getUid()).child("user_provider").setValue(user.getProviderId());
+
+
                 } else {
                     Log.d(TAG, "user logged out.");
                     Toast.makeText(getBaseContext(), "Sign out", Toast.LENGTH_SHORT).show();

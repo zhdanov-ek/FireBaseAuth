@@ -27,6 +27,8 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 /**
  * / Прежде чем начать необходимо включить в консоли файрбейс аутентификацию через фейсбук.
@@ -54,6 +56,7 @@ public class MyFaceBookActivity extends AppCompatActivity implements View.OnClic
 
     private static String TAG = "FACEBOOK_ACTIVITY";
     private FirebaseAuth mAuth;
+    private DatabaseReference mDb;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private CallbackManager mCallbackManager;
     private TextView tvStatusFireBase, tvStatusFacebook, tvLog;
@@ -73,6 +76,7 @@ public class MyFaceBookActivity extends AppCompatActivity implements View.OnClic
         btnSignOut.setOnClickListener(this);
 
         mAuth = FirebaseAuth.getInstance();
+        mDb = FirebaseDatabase.getInstance().getReference();
 
         // Проверяем есть ли аутентификация файрбейс
         if (mAuth.getCurrentUser() != null){
@@ -97,6 +101,14 @@ public class MyFaceBookActivity extends AppCompatActivity implements View.OnClic
                     tvStatusFireBase.setText(s);
                     print(" \nFirebase AuthListener catch change state \n Sign IN.\n User ID: " + user.getUid());
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    mDb.child("free").child(user.getUid()).child("user_name").setValue(user.getDisplayName());
+                    mDb.child("free").child(user.getUid()).child("user_email").setValue(user.getEmail());
+                    mDb.child("free").child(user.getUid()).child("user_provider").setValue(user.getProviderId());
+
+                    mDb.child("users").child(user.getUid()).child("user_name").setValue(user.getDisplayName());
+                    mDb.child("users").child(user.getUid()).child("user_email").setValue(user.getEmail());
+                    mDb.child("users").child(user.getUid()).child("user_provider").setValue(user.getProviderId());
+
                 } else {
                     // User is signed out
                     tvStatusFireBase.setText("no user");
@@ -130,6 +142,8 @@ public class MyFaceBookActivity extends AppCompatActivity implements View.OnClic
         });
 
     }
+
+
 
 
 
