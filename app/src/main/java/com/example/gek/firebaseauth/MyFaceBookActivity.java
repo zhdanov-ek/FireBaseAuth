@@ -101,13 +101,12 @@ public class MyFaceBookActivity extends AppCompatActivity implements View.OnClic
                     tvStatusFireBase.setText(s);
                     print(" \nFirebase AuthListener catch change state \n Sign IN.\n User ID: " + user.getUid());
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    mDb.child("free").child(user.getUid()).child("user_name").setValue(user.getDisplayName());
-                    mDb.child("free").child(user.getUid()).child("user_email").setValue(user.getEmail());
-                    mDb.child("free").child(user.getUid()).child("user_provider").setValue(user.getProviderId());
+
+                    mDb.child("free").child("history_sign_in").push().setValue(user.getEmail());
 
                     mDb.child("users").child(user.getUid()).child("user_name").setValue(user.getDisplayName());
                     mDb.child("users").child(user.getUid()).child("user_email").setValue(user.getEmail());
-                    mDb.child("users").child(user.getUid()).child("user_provider").setValue(user.getProviderId());
+                    mDb.child("users").child(user.getUid()).child("user_provider").setValue("facebook");
 
                 } else {
                     // User is signed out

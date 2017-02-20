@@ -5,6 +5,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+/**
+ * Как объединить к одному юзеру несколько систем авторизаций
+ *  http://stackoverflow.com/questions/37768529/how-to-link-multiple-auth-providers-to-an-firebase-account/37796597
+ *  */
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
     @Override

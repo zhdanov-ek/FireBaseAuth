@@ -63,13 +63,11 @@ public class MyGoogleActivity extends AppCompatActivity
                     Log.d(TAG, "user logged in: UID - " + user.getUid());
                     Toast.makeText(getBaseContext(), "Sign in " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
 
-                    mDb.child("free").child(user.getUid()).child("user_name").setValue(user.getDisplayName());
-                    mDb.child("free").child(user.getUid()).child("user_email").setValue(user.getEmail());
-                    mDb.child("free").child(user.getUid()).child("user_provider").setValue(user.getProviderId());
+                    mDb.child("free").child("history_sign_in").push().setValue(user.getEmail());
 
                     mDb.child("users").child(user.getUid()).child("user_name").setValue(user.getDisplayName());
                     mDb.child("users").child(user.getUid()).child("user_email").setValue(user.getEmail());
-                    mDb.child("users").child(user.getUid()).child("user_provider").setValue(user.getProviderId());
+                    mDb.child("users").child(user.getUid()).child("user_provider").setValue("google+");
 
 
                 } else {
